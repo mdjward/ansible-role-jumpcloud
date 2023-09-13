@@ -1,0 +1,4 @@
+- name: Ensure JumpCloud agent is running
+  service:
+    name: '{{ jumpcloud_service_name | default "jcagent" }}'
+    state: started

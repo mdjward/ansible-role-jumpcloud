@@ -1,0 +1,24 @@
+- name: Check JumpCloud key
+  fail:
+    msg: "jumpcloud_x_connect_key is not defined"
+  when: jumpcloud_x_connect_key == ""
+
+- name: Install curl package (Debian based)
+  package:
+    name:
+      - ntpdate
+      - curl
+    state: present
+
+- name: Check if JumpCloud is already installed
+  shell: "[ -d /opt/jc ] && echo 'Found' || echo ''"
+  register: jc_installed
+
+- block:
+  - name: Update time
+    shell: "ntpdate -u pool.ntp.org"
+
+  - name: Install JumpCloud
+    shell: "curl --header 'x-connect-key: {{ jumpcloud_x_connect_key }}' https://kickstart.jumpcloud.com/Kickstart | sudo bash"
+    notify: "Ensure JumpCloud agent is running"
+  when: "not jc_installed.stdout"
